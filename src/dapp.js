@@ -30,23 +30,13 @@ function useDApp({ appName }) {
 
   const ready = Boolean(tezos);
 
-  React.useEffect(() => {
-    return ThanosWallet.onAvailabilityChange((available) => {
-      setState({
-        wallet: available ? new ThanosWallet(appName) : null,
-        tezos: null,
-        accountPkh: null,
-      });
-    });
-  }, [setState, appName]);
-
   const connect = React.useCallback(
     async (network, opts) => {
       try {
         const tezos = new TezosToolkit("https://delphinet-tezos.giganode.io");
 
         const transport = await TransportU2F.create();
-        const ledgerSigner = new LedgerSigner(transport, `44'/1729'/0'/3'`, true, DerivationType.P256);
+        const ledgerSigner = new LedgerSigner(transport, `44'/1729'/0'/0'`, true, DerivationType.ED25519);
         tezos.setProvider({ signer: ledgerSigner });
         //Get the public key and the public key hash from the Ledger
         // const publicKey = await tezos.signer.publicKey();
