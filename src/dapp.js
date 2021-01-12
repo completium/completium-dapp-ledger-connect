@@ -1,6 +1,5 @@
 import React from 'react';
 import constate from 'constate';
-import { ThanosWallet } from '@thanos-wallet/dapp';
 import { LedgerSigner, DerivationType } from '@taquito/ledger-signer';
 import TransportU2F from "@ledgerhq/hw-transport-u2f";
 import { TezosToolkit } from "@taquito/taquito";
