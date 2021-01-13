@@ -7,39 +7,32 @@ import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
 
-export default function LedgerConnect(props) {
-  const { tezos, handleSelected } = props;
 
-  const [connected, setConnected] = React.useState(false);
-  const [transport, setTransport] = React.useState(false);
-  const [error, setError] = React.useState(null);
-  const [accountId, setAccountId] = React.useState("0");
-  const [changeId, setChangeId] = React.useState("0");
-  const [addressId, setAddressId] = React.useState(null);
-  const [derivationType, setDerivationType] = React.useState(DerivationType.ED25519);
+function LedgerStart(props) {
+  const { clickScan, clickManual } = props;
 
+  return (
+    <div>
+      <div>
+        <Button onClick={clickScan}> Scan ledger addresses </Button >
+      </div>
+      <div>
+        <Button onClick={clickManual}> Manual ledger connection </Button >
+      </div>
+    </div>);
+}
 
+function LedgerScan() {
+  return (<div>Scan addresses ...</div>);
+}
 
-  const initTransport = async () => {
-    try {
-      const tr = await TransportU2F.create();
-      setTransport(tr);
-      setConnected(true);
-    } catch (e) {
-      console.log(e);
-      setError(e);
-    }
-  }
+function LedgerError() {
+  return (<div>Error</div>);
+}
 
-  const updateTezos = async (accountId = 0, changeId = 0, addressId, dt = DerivationType.ED25519) => {
-    const path = (`44'/1729'/${accountId}'/${changeId}'`) + (addressId === null ? "" : `/${addressId}'`);
-    console.log(path);
-    const ledgerSigner = new LedgerSigner(transport, path, true, dt);
-    tezos.setProvider({ signer: ledgerSigner });
-    const publicKeyHash = await tezos.signer.publicKeyHash();
+function LedgerManualForm(props) {
 
-    handleSelected(publicKeyHash);
-  }
+  const { handleClickOpen, accountId, setAccountId, changeId, setChangeId, setAddressId, derivationType } = props;
 
   const handletextfield = (event) => {
     var value = event.target.value;
@@ -52,12 +45,8 @@ export default function LedgerConnect(props) {
     }
   };
 
-  const handleClickOpen = () => {
-    updateTezos(accountId, changeId, addressId, derivationType);
-  }
-
   return (
-    (connected ? (<div>
+    <div>
       <form noValidate autoComplete="off">
         <span>44'/1729'/</span>
         <TextField id="accountId" label="accountId" defaultValue={accountId} onChange={handletextfield} />
@@ -74,6 +63,53 @@ export default function LedgerConnect(props) {
           </Select>
         </div>
       </form>
-      <Button onClick={handleClickOpen}> Select address </Button></div>) : (<Button onClick={initTransport}> Connect ledger </Button>))
+      <Button onClick={handleClickOpen}> Select address </Button></div>
   );
+}
+
+export default function LedgerConnect(props) {
+  const { tezos, handleSelected } = props;
+
+  const [scan, setScan] = React.useState(false);
+  const [manual, setManual] = React.useState(false);
+  const [transport, setTransport] = React.useState(false);
+  const [error, setError] = React.useState(null);
+  const [accountId, setAccountId] = React.useState("0");
+  const [changeId, setChangeId] = React.useState("0");
+  const [addressId, setAddressId] = React.useState(null);
+  const [derivationType, setDerivationType] = React.useState(DerivationType.ED25519);
+
+  const initTransport = async (b) => {
+    try {
+      const tr = await TransportU2F.create();
+      setTransport(tr);
+      setScan(b);
+      setManual(!b);
+    } catch (e) {
+      console.log(e);
+      setError(e);
+    }
+  }
+
+  const clickScan = () => { initTransport(true); }
+  const clickManual = () => { initTransport(false); }
+
+  const updateTezos = async (accountId = 0, changeId = 0, addressId, dt = DerivationType.ED25519) => {
+    const path = (`44'/1729'/${accountId}'/${changeId}'`) + (addressId === null ? "" : `/${addressId}'`);
+    console.log(path);
+    const ledgerSigner = new LedgerSigner(transport, path, true, dt);
+    tezos.setProvider({ signer: ledgerSigner });
+    const publicKeyHash = await tezos.signer.publicKeyHash();
+
+    handleSelected(publicKeyHash);
+  }
+
+  const handleClickOpen = () => {
+    updateTezos(accountId, changeId, addressId, derivationType);
+  }
+
+  return (
+    (error !== null) ? (<LedgerError />) :
+      (manual ? (<LedgerManualForm handleClickOpen={handleClickOpen} accountId={accountId} setAccountId={setAccountId} changeId={changeId} setChangeId={setChangeId} addressId={addressId} setAddressId={setAddressId} derivationType={derivationType} setDerivationType={setDerivationType} />) :
+        (scan ? (<LedgerScan />) : (<LedgerStart clickManual={clickManual} clickScan={clickScan} />))));
 }
