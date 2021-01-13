@@ -6,20 +6,65 @@ import TextField from '@material-ui/core/TextField';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
+import Ledger from './Ledger.svg'
+import { Icon } from "@material-ui/core";
+import Container from '@material-ui/core/Container';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
+const LedgerIcon = () => (
+  <Icon>
+    <img src={Ledger} height={50} width={200} />
+  </Icon>
+)
 
 function LedgerStart(props) {
   const { clickScan, clickManual } = props;
 
+  const handleAutomatic = () => {
+
+  };
+
+  const handleManual = () => {
+
+  };
+
   return (
     <div>
+      <div>Select mode to discover public address</div>
       <div>
-        <Button onClick={clickScan}> Scan ledger addresses </Button >
+        <Button onClick={handleAutomatic}> Automatic </Button >
       </div>
       <div>
-        <Button onClick={clickManual}> Manual ledger connection </Button >
+        <Button onClick={handleManual}> Manual Connect </Button >
       </div>
+      <div>(enter derivation path)</div>
     </div>);
+}
+
+function LedgerWait() {
+
+  const handleCancel = () => {
+
+  };
+
+  return (<div>
+    <CircularProgress />
+    <div>Connecting to Ledger ...</div>
+    <div><Button onClick={handleCancel}> Cancel </Button ></div>
+  </div>);
+}
+
+function LedgerTimeLeft() {
+
+  const handleCancel = () => {
+
+  };
+
+  return (<div>
+    <div>Please accept on Ledger to provide public address</div>
+    <div>Time left: ...</div>
+    <div><Button onClick={handleCancel}> Cancel </Button ></div>
+  </div>);
 }
 
 function LedgerScan() {
@@ -67,7 +112,7 @@ function LedgerManualForm(props) {
   );
 }
 
-export default function LedgerConnect(props) {
+function LedgerContent(props) {
   const { tezos, handleSelected } = props;
 
   const [scan, setScan] = React.useState(false);
@@ -108,8 +153,19 @@ export default function LedgerConnect(props) {
     updateTezos(accountId, changeId, addressId, derivationType);
   }
 
+  return (<LedgerTimeLeft />);
+  // ((error !== null) ? (<LedgerError />) :
+  //   (manual ? (<LedgerManualForm handleClickOpen={handleClickOpen} accountId={accountId} setAccountId={setAccountId} changeId={changeId} setChangeId={setChangeId} addressId={addressId} setAddressId={setAddressId} derivationType={derivationType} setDerivationType={setDerivationType} />) :
+  //     (scan ? (<LedgerScan />) : (<LedgerStart clickManual={clickManual} clickScan={clickScan} />))));
+}
+
+export default function LedgerConnect(props) {
+  const { tezos, handleSelected } = props;
+
   return (
-    (error !== null) ? (<LedgerError />) :
-      (manual ? (<LedgerManualForm handleClickOpen={handleClickOpen} accountId={accountId} setAccountId={setAccountId} changeId={changeId} setChangeId={setChangeId} addressId={addressId} setAddressId={setAddressId} derivationType={derivationType} setDerivationType={setDerivationType} />) :
-        (scan ? (<LedgerScan />) : (<LedgerStart clickManual={clickManual} clickScan={clickScan} />))));
+    <Container>
+      <div><span><LedgerIcon /><span>connect</span></span></div>
+      <div><span>by Completium</span></div>
+      <LedgerContent tezos={tezos} handleSelected={handleSelected} />
+    </Container>);
 }
